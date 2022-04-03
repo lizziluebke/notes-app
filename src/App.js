@@ -12,6 +12,7 @@ import { v4 as uuid } from 'uuid';
 import {
   createNote as CreateNote,
   deleteNote as DeleteNote
+  , updateNote as updateNote
 } from './graphql/mutations';
 
 
@@ -130,6 +131,37 @@ const App = () => {
 
   };
 
+  const UpdateNote = async (noteToUpdate) => {
+
+      // update the state and display optimistically
+      dispatch({
+        type: "SET_NOTES"
+        , notes: state.notes.map(x => ({
+          ...x 
+          , completed: x === noteToUpdate ? !x.completed : x.completed
+        }))
+      });  
+
+      //then call the backend 
+      try {
+        await API.graphql({
+          query: UpdateNote
+          , variables: {
+            input: {
+              id: noteToUpdate.id
+              , completed: !noteToUpdate.completed
+            }
+          }
+        });
+
+      }
+
+      catch (err) {
+        console.log(err); 
+      }
+
+  };
+
   const onChange = (e) => {
     dispatch({ 
       type: 'SET_INPUT', name: e.target.name, value: e.target.value 
@@ -142,10 +174,21 @@ const App = () => {
   style={styles.item}
   actions={[
     <p style={styles.p} onClick={() => DeleteNote(item)}>Delete</p>
+    , <p
+    style={styles.p} onClick={() => UpdateNote(item)}>
+    
+      {item.completed ? 'Mark incomplete' : '  Mark complete' }
+
+
+    </p>
+
+
+
   ]}
 >
+  
         <List.Item.Meta
-          title={item.name}
+          title={`${item.name}${item.completed ? '(completed)' : '(mark completed)'}`}
           description={item.description}
         />
       </List.Item>
