@@ -72,7 +72,7 @@ const App = () => {
   }, []);
 
 
-  const CreateNote = async () => {
+  const createNote = async () => {
     const { form } = state
     if (!form.name || !form.description) {
        return alert('please enter a name and description');
@@ -105,7 +105,7 @@ const App = () => {
     }
   };
 
-  const DeleteNote = async (noteToDelete) => {
+  const deleteNote = async (noteToDelete) => {
 
       //optimisitically update state and screen
       dispatch({
@@ -214,7 +214,7 @@ const App = () => {
       style={styles.input}
     />
     <Button
-      onClick={CreateNote}
+      onClick={createNote}
       type="primary"
       >
         Create Note
