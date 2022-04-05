@@ -72,7 +72,7 @@ const App = () => {
   }, []);
 
 
-  const createNote = async () => {
+  const CreateNote = async () => {
     const { form } = state
     if (!form.name || !form.description) {
        return alert('please enter a name and description');
@@ -92,7 +92,7 @@ const App = () => {
 
     try {
       await API.graphql({
-        query: createNote,
+        query: CreateNote,
         variables: { 
           input: note 
         }
@@ -105,7 +105,7 @@ const App = () => {
     }
   };
 
-  const deleteNote = async (noteToDelete) => {
+  const DeleteNote = async (noteToDelete) => {
 
       //optimisitically update state and screen
       dispatch({
@@ -116,7 +116,7 @@ const App = () => {
       // then do the delete via graphql mutation
       try {
           await API.graphql({ 
-            query: deleteNote,
+            query: DeleteNote,
              variables: {
                input: {
                  id: noteToDelete.id
@@ -146,11 +146,12 @@ const App = () => {
     try {
       await API.graphql({
         query : UpdateNote
-        , variables: {
-          input: noteToUpdate.id 
+        , variables: { 
+          input: {
+            id: noteToUpdate.id 
           , completed: !noteToUpdate.completed
 
-          
+          }
         }
       })
     }
