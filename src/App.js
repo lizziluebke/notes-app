@@ -10,9 +10,9 @@ import { v4 as uuid } from 'uuid';
 
 
 import {
-  createNote as CreateNote,
-  deleteNote as DeleteNote
-  , updateNote as updateNote
+  createNote as CreateNote
+  , deleteNote as DeleteNote
+  , updateNote as UpdateNote
 } from './graphql/mutations';
 
 
@@ -72,7 +72,7 @@ const App = () => {
   }, []);
 
 
-  const CreateNote = async () => {
+  const createNote = async () => {
     const { form } = state
     if (!form.name || !form.description) {
        return alert('please enter a name and description');
@@ -92,7 +92,7 @@ const App = () => {
 
     try {
       await API.graphql({
-        query: CreateNote,
+        query: createNote,
         variables: { 
           input: note 
         }
@@ -105,7 +105,7 @@ const App = () => {
     }
   };
 
-  const DeleteNote = async (noteToDelete) => {
+  const deleteNote = async (noteToDelete) => {
 
       //optimisitically update state and screen
       dispatch({
@@ -116,7 +116,7 @@ const App = () => {
       // then do the delete via graphql mutation
       try {
           await API.graphql({ 
-            query: DeleteNote,
+            query: deleteNote,
              variables: {
                input: {
                  id: noteToDelete.id
@@ -126,39 +126,38 @@ const App = () => {
           } 
 
       catch (err) {
-          console.log(err);
+          console.error(err);
       }
 
   };
 
-  const UpdateNote = async (noteToUpdate) => {
+  const updateNote = async (noteToUpdate) => {
 
-      // update the state and display optimistically
-      dispatch({
-        type: "SET_NOTES"
-        , notes: state.notes.map(x => ({
-          ...x 
-          , completed: x === noteToUpdate ? !x.completed : x.completed
-        }))
-      });  
+    //update the state and display optimistically
+    dispatch({
+      type: "SET_NOTES"
+      , notes: state.notes.map(x => ({
+        ...x
+        , completed: x === noteToUpdate ? !x.completed : x.completed
+      })) 
+    });
 
-      //then call the backend 
-      try {
-        await API.graphql({
-          query: UpdateNote
-          , variables: {
-            input: {
-              id: noteToUpdate.id
-              , completed: !noteToUpdate.completed
-            }
-          }
-        });
+    //then call the backend
+    try {
+      await API.graphql({
+        query : UpdateNote
+        , variables: {
+          input: noteToUpdate.id 
+          , completed: !noteToUpdate.completed
 
-      }
+          
+        }
+      })
+    }
 
-      catch (err) {
-        console.log(err); 
-      }
+    catch (err) {
+      console.error(err);
+    }
 
   };
 
@@ -171,24 +170,24 @@ const App = () => {
   const renderItem = (item) => {
     return (
       <List.Item
-  style={styles.item}
-  actions={[
-    <p style={styles.p} onClick={() => DeleteNote(item)}>Delete</p>
-    , <p
-    style={styles.p} onClick={() => UpdateNote(item)}>
-    
-      {item.completed ? 'Mark incomplete' : '  Mark complete' }
-
-
-    </p>
-
-
-
-  ]}
->
+      style={styles.item}
+       actions={[
+          <p 
+              style={styles.p} onClick={() => DeleteNote(item)}    
+          >
+                Delete
+          </p>
+          , 
+          <p
+              style={styles.p} onClick={() => updateNote(item)}
+          >
+              {item.completed ? 'Mark incomplete' : '  Mark complete' }
+          </p>
+        ]}
+      >
   
         <List.Item.Meta
-          title={`${item.name}${item.completed ? '(completed)' : '(mark completed)'}`}
+          title={`${item.name}${item.completed ? ' (completed)' : ' '}`}
           description={item.description}
         />
       </List.Item>
