@@ -7,6 +7,7 @@ import {  List, Input, Button } from 'antd';
 import 'antd/dist/antd.css';
 import {  listNotes } from './graphql/queries'; 
 import { v4 as uuid } from 'uuid';
+import { onCreateNote } from './graphql/subscriptions';
 
 
 import {
@@ -68,8 +69,28 @@ const App = () => {
 
   useEffect(
     () => {
-    fetchNotes()
-  }, []);
+    fetchNotes();
+
+    const subscription = API.graphql({
+      query: onCreateNote
+    }).subscribe({
+        next: noteData => {
+          const note = noteData.value.data.onCreateNote
+            if (CLIENT_ID === note.clientId) return;
+            dispatch(
+              {
+                 type: 'ADD_NOTE'
+                 , note 
+                }
+            );
+          }
+      })
+
+      // Pass a clean up function to react
+      return () => subscription.unsubscribe()
+    }
+    , []
+  );
 
 
   const createNote = async () => {
